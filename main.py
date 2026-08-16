@@ -7,7 +7,7 @@ summary = {"total_assignments": 0, "total_exams": 0, "average_score": 0.0}, {"to
 
 class Assignment:                        #the class holds the attributes of an assignment, including subject, score, title, max_score, due_date, and type.
     def __init__(self, subject, title, max_score, score, due_date, atype):
-        self.subject = subject
+        self.subject = subject.lower().strip()          # ensures that the subject is always stored in lowercase and withouttrailing spaces
         self.max_score = max_score
         self.score = score
         self.title = title
@@ -22,7 +22,6 @@ class Exam(Assignment):
     def __init__(self, subject, title, max_score, score, due_date):
         super().__init__(subject, title, max_score, score, due_date, "exam")            # exam is automatically set as the type for exam assignments
                
-#exam1 = Exam("Math", 85, "Midterm Exam", 100, date(2023, 10, 15))   
 
 class GradeTracker:
     def __init__(self):
@@ -39,18 +38,18 @@ class GradeTracker:
     def filter_assignments(self, subject=None, atype=None, due_date=None):               # so each filter is optional, we set default values to None
         filtered_assignments = self.assignments
         if subject:
-            new_list = []                           # 1. start empty
-            for assignment in filtered_assignments:  # 2. go through current list
-                if assignment.subject == subject:    # 3. check the condition
-                    new_list.append(assignment)       # 4. keep matches
-            filtered_assignments = new_list           # 5. replace with the filtered result
+            new_list = []                                         # 1. start empty
+            for assignment in filtered_assignments:                 # 2. go through current list
+                if assignment.subject == subject.lower().strip():         # 3. check the condition and ensures capitalization and whitespace don't affect the filtering
+                    new_list.append(assignment)                              # 4. keep matches
+            filtered_assignments = new_list                              # 5. replace with the filtered result
         if atype:
             new_list = []                          
             for assignment in filtered_assignments:  
                 if assignment.type == atype:    
                     new_list.append(assignment)       
             filtered_assignments = new_list           
-        if due_date:             #due_date in format "YYYY-MM" for filtering by month
+        if due_date:                                               #due_date in format "YYYY-MM" for filtering by month
             new_list = []                          
             for assignment in filtered_assignments:  
                 if assignment.due_date.startswith(due_date):     #to match the month of the due_date, we used .startswith()
@@ -91,7 +90,7 @@ def student_success_tracker():
             homework.title = input("Enter title: ")
             homework.max_score = float(input("Enter max score: "))
             homework.score = float(input("Enter score (0-100): "))
-            while homework.max_score < homework.score:          # ensures that the score is never greater than the max score
+            while homework.max_score < homework.score:                                              # ensures that the score is never greater than the max score
                 print("Score cannot be greater than max score. Please enter a valid score.")
                 homework.score = float(input("Enter score (0-100): "))
             homework.due_date = input("Enter due date (YYYY-MM-DD): ")
@@ -109,31 +108,40 @@ def student_success_tracker():
             tracker.add_assignment(exam)
         elif choice == "3":
             tracker.list_assignments()
-        elif choice == "4":
+        elif choice == "4":                                                     # It prompts the user for their choice and then calls the filter_assignments method of the GradeTracker class with the appropriate parameters. 
             filter_choice = input("Filter by subject, type, or month? (subject/type/month): ")
             if filter_choice == "subject":
                 subject = input("Enter subject to filter by: ")
                 filtered = tracker.filter_assignments(subject=subject)
-                for assignment in filtered:
-                    print(f"{assignment.subject} - {assignment.score} - {assignment.title} - {assignment.due_date} - {assignment.type}")
+                if filtered == []:                                               # provides feedback to the user if no assignments match the filter criteria.
+                    print(f"No assignments found for subject: {subject}")
+                else:    
+                    for assignment in filtered:
+                        print(f"{assignment.subject} - {assignment.score} - {assignment.title} - {assignment.due_date} - {assignment.type}")
             elif filter_choice == "type":
                 atype = input("Enter type to filter by (homework/exam): ")
                 filtered = tracker.filter_assignments(atype=atype)
-                for assignment in filtered:
-                    print(f"{assignment.subject} - {assignment.score} - {assignment.title} - {assignment.due_date} - {assignment.type}")
+                if not filtered:
+                    print(f"No assignments found for type: {atype}")
+                else:    
+                    for assignment in filtered:
+                        print(f"{assignment.subject} - {assignment.score} - {assignment.title} - {assignment.due_date} - {assignment.type}")
             elif filter_choice == "month":
                 month = input("Enter month to filter by (YYYY-MM): ")
                 filtered = tracker.filter_assignments(due_date=month)
-                for assignment in filtered:
-                    print(f"{assignment.subject} - {assignment.score} - {assignment.title} - {assignment.due_date} - {assignment.type}")    
+                if not filtered:
+                    print(f"No assignments found for month: {month}")
+                else:
+                    for assignment in filtered:
+                        print(f"{assignment.subject} - {assignment.score} - {assignment.title} - {assignment.due_date} - {assignment.type}")    
             else:
                 print("Invalid filter choice.") 
         elif choice == "5":
             tracker.show_summary()
-        elif choice == "0":
+        elif choice == "0":                                      #exits the program when the user chooses to exit the program.
                 print(f"Exiting program. Goodbye, {student}!")
                 break
-        else:
+        else:                                                   # handles invalid choices by prompting the user to try again.
             print("Invalid choice. Please try again.")
     
    
